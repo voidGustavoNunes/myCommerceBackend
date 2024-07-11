@@ -11,10 +11,10 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name="category_name")
+@Table(name="category")
 public class Category extends GenericModel{
     
-    @Column(name="name")
+    @Column(name="category_name")
     private String name;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "category")
