@@ -14,4 +14,6 @@ import com.luv.springboot_ecommerce.model.Product;
 // @RepositoryRestResource(collectionResourceRel = "products", path="products") //colletionResourceRel = oq vem no json, path = oq vem na url ex: localhost:8080/api/products
 public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> findByCategoryId(@Param("id") Long id, Pageable pageable);
+
+    Page<Product> findByNameContaining(@RequestParam("name") String name, Pageable pageable);
 }

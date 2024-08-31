@@ -1,5 +1,5 @@
 package com.luv.springboot_ecommerce.service;
 
-public class CategoryService {
+public class CategoryService extends GenericService{
     
 }
