@@ -1,44 +1,61 @@
 version: '3.8'
 
+volumes:
+  mysql-data:
+
+networks:
+  app-network:
+    driver: bridge
+
 services:
-  mysql-db:
-    image: mysql:8.0
-    container_name: mysql-db
-    environment:
-      MYSQL_ROOT_PASSWORD: ecommerceapp
-      MYSQL_DATABASE: full-stack-ecommerce
-      MYSQL_ROOT_HOST: '%'
+  frontend:
+    build:
+      context: ../../frontend/myCommerceFrontend
+      dockerfile: ../../backend/myCommerceBackend/.docker/frontend/Dockerfile
+    volumes:
+      - ../../backend/myCommerceBackend/.docker/frontend/nginx-config.conf:/etc/nginx/conf.d/default.conf
     ports:
-      - "3306:3306"
+      - "4200:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  backend:
+    container_name: ${COMPOSE_PROJECT_NAME:-ecommerce}-backend
+    build:
+      context: .
+      dockerfile: ./.docker/backend/Dockerfile
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://${DATABASE_HOSTNAME:-mysql-db}:${DATABASE_PORT:-3306}/${DATABASE_NAME:-full-stack-ecommerce}?useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=${DATABASE_USER:-root}
+      - SPRING_DATASOURCE_PASSWORD=${DATABASE_PASSWORD:-ecommerceapp}
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-prod}
+      - SERVER_PORT=${BACKEND_PORT:-8080}
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    networks:
+      - app-network
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+
+  mysql-db:
+    container_name: ${COMPOSE_PROJECT_NAME:-ecommerce}-mysql
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DATABASE_PASSWORD:-ecommerceapp}
+      - MYSQL_DATABASE=${DATABASE_NAME:-full-stack-ecommerce}
+      - MYSQL_ROOT_HOST=%
+    ports:
+      - "${DATABASE_PORT:-3306}:3306"
     volumes:
       - mysql-data:/var/lib/mysql
     networks:
-      - spring-mysql-net
+      - app-network
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD"]
       interval: 10s
       timeout: 5s
       retries: 3
       start_period: 30s
-
-  springboot-app:
-    build: .
-    container_name: full-stack-ecommerce-app
-    ports:
-      - "8080:8080"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/full-stack-ecommerce?useSSL=false&useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&serverTimezone=UTC
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=ecommerceapp
-    depends_on:
-      mysql-db:
-        condition: service_healthy
-    networks:
-      - spring-mysql-net
-
-networks:
-  spring-mysql-net:
-    driver: bridge
-
-volumes:
-  mysql-data:
