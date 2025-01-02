@@ -22,6 +22,9 @@ public class Category extends GenericModel{
     @Column(name="category_name")
     private String name;
 
+    @Column(name="category_description")
+    private int quantity;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "category")
     Set<Product> products;
 

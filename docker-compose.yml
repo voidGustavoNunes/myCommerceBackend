@@ -10,10 +10,10 @@ networks:
 services:
   frontend:
     build:
-      context: ../../frontend/myCommerceFrontend
-      dockerfile: ../../backend/myCommerceBackend/.docker/frontend/Dockerfile
+      context: ../frontend/angular/angular-ecommerce
+      dockerfile: ../../../spring/.docker/frontend/Dockerfile
     volumes:
-      - ../../backend/myCommerceBackend/.docker/frontend/nginx-config.conf:/etc/nginx/conf.d/default.conf
+      - ./.docker/frontend/nginx-config.conf:/etc/nginx/conf.d/default.conf
     ports:
       - "4200:80"
     depends_on:
@@ -27,7 +27,7 @@ services:
       context: .
       dockerfile: ./.docker/backend/Dockerfile
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://${DATABASE_HOSTNAME:-mysql-db}:${DATABASE_PORT:-3306}/${DATABASE_NAME:-full-stack-ecommerce}?useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_URL=jdbc:mysql://${DATABASE_HOSTNAME:-spring-mysql}:${DATABASE_PORT:-3306}/${DATABASE_NAME:-full-stack-ecommerce}?useSSL=false&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_USERNAME=${DATABASE_USER:-root}
       - SPRING_DATASOURCE_PASSWORD=${DATABASE_PASSWORD:-ecommerceapp}
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-prod}
